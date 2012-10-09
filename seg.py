@@ -30,5 +30,5 @@ def solve(s):
  
 if __name__ == '__main__':
     init()
-    s = u'其中最123简单的就是最大匹配的中文分词'
+    s = u'其中最简单的就是最大匹配的中文分词'
     print ' '.join(list(solve(s)))
