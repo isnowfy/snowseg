@@ -1,30 +1,29 @@
 # -*- coding: UTF-8 -*-
  
 import math
-import good_turing
+import frequency
 
-d = {}
+d = frequency.GoodTuringProb()
+#d = frequency.AddOneProb()
 log = lambda x: float('-inf') if not x else math.log(x)
-prob = lambda x: d[x] if x in d else 0 if len(x)>1 else d['_none_']
+prob = lambda x: d.get(x)[1] if d.get(x)[0] or len(x)==1 else 0
  
 def init(filename='SogouLabDic.dic'):
-    global d
     with open(filename, 'r') as handle:
         for line in handle:
             word, freq = line.split('\t')[0:2]
             try:
-                d[word.decode('gbk')] = int(freq)+1
+                word = word.decode('gbk')
             except:
-                d[word] = int(freq)+1
-    tmp, d = good_turing.main(d)
-    d['_none_'] = tmp
+                pass
+            d.add(word, int(freq))
  
 def solve(s):
     l = len(s)
     p = [0 for i in range(l+1)]
     t = [0 for i in range(l)]
     for i in xrange(l-1, -1, -1):
-        p[i], t[i] = max((log(prob(s[i:i+k]))+p[i+k], k)
+        p[i], t[i] = max((log(prob(s[i:i+k])/d.getsum())+p[i+k], k)
                         for k in xrange(1, l-i+1))
     while p[l]<l:
         yield s[p[l]:p[l]+t[p[l]]]
