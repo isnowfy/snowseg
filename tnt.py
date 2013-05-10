@@ -20,6 +20,11 @@ class TnT(object):
         self.tri = frequency.AddOneProb()
         self.eos = frequency.AddOneProb()
 
+    def _safe_div(self, v1, v2):
+        if v2 == 0:
+            return -1
+        return float(v1) / float(v2)
+
     def train(self, data):
         now = ['BOS', 'BOS']
         for sentence in data:
@@ -36,4 +41,24 @@ class TnT(object):
         tl2 = 0.0
         tl3 = 0.0
         for now in self.tri.samples():
-            pass
+            c1 = self._safe_div(self.tri.get(now)-1, self.bi.get(now[:2])-1)
+            c2 = self._safe_div(self.bi.get(now[1:])-1, self.uni.get(now[1])-1)
+            c3 = self._safe_div(self.uni.get(now[2])-1, self.uni.getsum()-1)
+            if c1 > c2 and c1 > c3:
+                tl1 += self.tri.get(now)
+            elif c2 > c1 and c2 > c3:
+                tl2 += self.tri.get(now)
+            elif c3 > c1 and c3 > c2:
+                tl3 += self.tri.get(now)
+            elif c1 == c2 and c1 > c3:
+                tl1 += self.tri.get(now)
+                tl2 += self.tri.get(now)
+            elif c2 == c3 and c2 > c1:
+                tl2 += self.tri.get(now)
+                tl3 += self.tri.get(now)
+            elif c1 == c3 and c1 > c2:
+                tl3 += self.tri.get(now)
+                tl1 += self.tri.get(now)
+        self.l1 = self._safe_div(tl1, tl1+tl2+tl3)
+        self.l2 = self._safe_div(tl2, tl1+tl2+tl3)
+        self.l3 = self._safe_div(tl3, tl1+tl2+tl3)
