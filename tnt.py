@@ -62,3 +62,18 @@ class TnT(object):
         self.l1 = self._safe_div(tl1, tl1+tl2+tl3)
         self.l2 = self._safe_div(tl2, tl1+tl2+tl3)
         self.l3 = self._safe_div(tl3, tl1+tl2+tl3)
+
+    def tag(self, data):
+        now = [(('BOS', 'BOS'), 1.0, [])]
+        for w in data:
+            stage = []
+            for pre in now:
+                for s in self.status:
+                    wd = self.wd.get((s, w))
+                    uni = self.uni.get(s)
+                    bi = self.bi.get(tuple((pre[0][1], s)))
+                    tri = self.tri.get(tuple((pre[0][0], pre[0][1], s)))
+                    p = pre[1]*wd*(self.l1*tri+self.l2*bi+self.l3*uni)
+                    stage.append((pre[1], s), p, pre[2]+[s])
+            now = sorted(stage, key=lambda x:-x[1])[:self.N]
+        return zip(now[2], data)
