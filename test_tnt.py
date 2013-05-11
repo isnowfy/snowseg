@@ -11,7 +11,6 @@ def main():
         if not line.strip():
             continue
         words = map(lambda x: x.split('/'), line.split(' '))
-        words = map(lambda x: (x[1], x[0]), words)
         data.append(words)
     model = tnt.TnT()
     model.train(data)
@@ -21,7 +20,7 @@ def main():
     for c1, sent in enumerate(data):
         for c2, wd in enumerate(sent):
             total += 1
-            if wd[0] != ret[c1][c2][0]:
+            if wd[1] != ret[c1][c2][1]:
                 error += 1
     print 'total: %d, error: %d, precision: %f' % (total, error, float(error).total)
 

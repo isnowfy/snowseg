@@ -11,7 +11,7 @@ import frequency
 class TnT(object):
 
     def __init__(self, N=1000):
-        self.N = 1000
+        self.N = N
         self.l1 = 0.0
         self.l2 = 0.0
         self.l3 = 0.0
@@ -70,6 +70,7 @@ class TnT(object):
 
     def tag(self, data):
         now = [(('BOS', 'BOS'), 0.0, [])]
+        print self.status
         for w in data:
             stage = {}
             for pre in now:
@@ -85,4 +86,4 @@ class TnT(object):
             stage = map(lambda x: (x[0], x[1][0], x[1][1]), stage.items())
             now = sorted(stage, key=lambda x:-x[1])[:self.N]
             print len(now)
-        return zip(now[2], data)
+        return zip(data, now[0][2])
