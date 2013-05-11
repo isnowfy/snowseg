@@ -14,7 +14,7 @@ def main():
         data.append(words)
     model = tnt.TnT()
     model.train(data)
-    ret = [model.tag(sent) for sent in data]
+    ret = [model.tag(map(lambda x:x[0], sent)) for sent in data]
     total = 0
     error = 0
     for c1, sent in enumerate(data):
