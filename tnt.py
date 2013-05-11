@@ -4,6 +4,8 @@
 Implementation of 'TnT - A Statisical Part of Speech Tagger'
 '''
 
+from math import log
+
 import frequency
 
 class TnT(object):
@@ -41,39 +43,46 @@ class TnT(object):
         tl2 = 0.0
         tl3 = 0.0
         for now in self.tri.samples():
-            c1 = self._safe_div(self.tri.get(now)-1, self.bi.get(now[:2])-1)
-            c2 = self._safe_div(self.bi.get(now[1:])-1, self.uni.get(now[1])-1)
-            c3 = self._safe_div(self.uni.get(now[2])-1, self.uni.getsum()-1)
+            c1 = self._safe_div(self.tri.get(now)[1]-1,
+                                self.bi.get(now[:2])[1]-1)
+            c2 = self._safe_div(self.bi.get(now[1:])[1]-1,
+                                self.uni.get(now[1])[1]-1)
+            c3 = self._safe_div(self.uni.get(now[2])[1]-1,
+                                self.uni.getsum()-1)
             if c1 > c2 and c1 > c3:
-                tl1 += self.tri.get(now)
+                tl1 += self.tri.get(now)[1]
             elif c2 > c1 and c2 > c3:
-                tl2 += self.tri.get(now)
+                tl2 += self.tri.get(now)[1]
             elif c3 > c1 and c3 > c2:
-                tl3 += self.tri.get(now)
+                tl3 += self.tri.get(now)[1]
             elif c1 == c2 and c1 > c3:
-                tl1 += self.tri.get(now)
-                tl2 += self.tri.get(now)
+                tl1 += self.tri.get(now)[1]/2.0
+                tl2 += self.tri.get(now)[1]/2.0
             elif c2 == c3 and c2 > c1:
-                tl2 += self.tri.get(now)
-                tl3 += self.tri.get(now)
+                tl2 += self.tri.get(now)[1]/2.0
+                tl3 += self.tri.get(now)[1]/2.0
             elif c1 == c3 and c1 > c2:
-                tl3 += self.tri.get(now)
-                tl1 += self.tri.get(now)
+                tl3 += self.tri.get(now)[1]/2.0
+                tl1 += self.tri.get(now)[1]/2.0
         self.l1 = self._safe_div(tl1, tl1+tl2+tl3)
         self.l2 = self._safe_div(tl2, tl1+tl2+tl3)
         self.l3 = self._safe_div(tl3, tl1+tl2+tl3)
 
     def tag(self, data):
-        now = [(('BOS', 'BOS'), 1.0, [])]
+        now = [(('BOS', 'BOS'), 0.0, [])]
         for w in data:
-            stage = []
+            stage = {}
             for pre in now:
                 for s in self.status:
-                    wd = self.wd.get((s, w))
-                    uni = self.uni.get(s)
-                    bi = self.bi.get(tuple((pre[0][1], s)))
-                    tri = self.tri.get(tuple((pre[0][0], pre[0][1], s)))
-                    p = pre[1]*wd*(self.l1*tri+self.l2*bi+self.l3*uni)
-                    stage.append((pre[1], s), p, pre[2]+[s])
+                    wd = self.wd.get((s, w))[1]
+                    uni = self.uni.get(s)[1]
+                    bi = self.bi.get(tuple((pre[0][1], s)))[1]
+                    tri = self.tri.get(tuple((pre[0][0], pre[0][1], s)))[1]
+                    p = pre[1]+log(wd)+\
+                        log(self.l1*tri+self.l2*bi+self.l3*uni)
+                    if (pre[1], s) not in stage or p > stage[(pre[1], s)][0]:
+                        stage[(pre[1], s)] = (p, pre[2]+[s])
+            stage = map(lambda x: (x[0], x[1][0], x[1][1]), stage.items())
             now = sorted(stage, key=lambda x:-x[1])[:self.N]
+            print len(now)
         return zip(now[2], data)
