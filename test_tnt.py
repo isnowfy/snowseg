@@ -22,7 +22,8 @@ def main():
             total += 1
             if wd[1] != ret[c1][c2][1]:
                 error += 1
-    print 'total: %d, error: %d, precision: %f' % (total, error, float(error).total)
+    print 'total: %d, error: %d, precision: %f' %\
+        (total, error, float(total-error)/total)
 
 if __name__ == '__main__':
     main()

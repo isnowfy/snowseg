@@ -20,6 +20,9 @@ class BaseProb(object):
             return False, self.none
         return True, self.d[key]
 
+    def freq(self, key):
+        return float(self.get(key)[1])/self.total
+
     def samples(self):
         return self.d.keys()
 
