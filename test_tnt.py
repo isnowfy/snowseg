@@ -4,14 +4,19 @@ import codecs
 
 import tnt
 
-def main():
+def getdata(filename='brown.txt'):
     data = []
-    f = codecs.open('brown.txt', 'r', 'utf-8')
+    f = codecs.open(filename, 'r', 'utf-8')
     for line in f:
-        if not line.strip():
+        line = line.strip()
+        if not line:
             continue
         words = map(lambda x: x.split('/'), line.split(' '))
         data.append(words)
+    return data
+
+def main():
+    data = getdata()
     model = tnt.TnT()
     model.train(data)
     ret = [model.tag(map(lambda x:x[0], sent)) for sent in data]
