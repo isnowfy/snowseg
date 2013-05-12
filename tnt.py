@@ -31,6 +31,12 @@ class TnT(object):
             return 0
         return float(v1)/v2
 
+    def geteos(self, tag):
+        tmp = self.eosd.get(tag)
+        if not tmp[0]:
+            return log(1.0/len(self.status))
+        return log(self.eos.get((tag, 'EOS'))[1])-log(self.eosd.get(tag)[1])
+
     def train(self, data):
         now = ['BOS', 'BOS']
         for sentence in data:
@@ -91,8 +97,5 @@ class TnT(object):
                         stage[(pre[0][1], s)] = (p, pre[2]+[s])
             stage = map(lambda x: (x[0], x[1][0], x[1][1]), stage.items())
             now = heapq.nlargest(self.N, stage, key=lambda x:x[1])
-        now = heapq.nlargest(1, stage,
-                             key=lambda x: x[1]+\
-                                           log(self.eos.get((x[0][1], 'EOS'))[1])\
-                                           -log(self.eosd.get(x[0][1])[1]))
+        now = heapq.nlargest(1, stage, key=lambda x: x[1]+self.geteos(x[0][1]))
         return zip(data, now[0][2])
