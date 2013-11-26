@@ -11,7 +11,7 @@ def getdata(filename='brown.txt'):
         line = line.strip()
         if not line:
             continue
-        words = map(lambda x: x.split('/'), line.split(' '))
+        words = map(lambda x: x.split('/'), line.split())
         data.append(words)
     return data
 
